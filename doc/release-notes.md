@@ -1,11 +1,11 @@
-Bitcoin Core version 0.14.1 is now available from:
+Bitcoin Core version 0.16.2 is now available from:
 
-  <https://bitcoin.org/bin/bitcoin-core-0.14.1/>
+  <https://bitcoincore.org/bin/bitcoin-core-0.16.2/>
 
-This is a new minor version release, including various bugfixes and
-performance improvements, as well as updated translations.
+This is a new minor version release, with various bugfixes
+as well as updated translations.
 
-Please report bugs using the issue tracker at github:
+Please report bugs using the issue tracker at GitHub:
 
   <https://github.com/bitcoin/bitcoin/issues>
 
@@ -13,131 +13,104 @@ To receive security and update notifications, please subscribe to:
 
   <https://bitcoincore.org/en/list/announcements/join/>
 
+How to Upgrade
+==============
+
+If you are running an older version, shut it down. Wait until it has completely
+shut down (which might take a few minutes for older versions), then run the
+installer (on Windows) or just copy over `/Applications/Bitcoin-Qt` (on Mac)
+or `bitcoind`/`bitcoin-qt` (on Linux).
+
+The first time you run version 0.15.0 or newer, your chainstate database will be converted to a
+new format, which will take anywhere from a few minutes to half an hour,
+depending on the speed of your machine.
+
+Note that the block database format also changed in version 0.8.0 and there is no
+automatic upgrade code from before version 0.8 to version 0.15.0 or higher. Upgrading
+directly from 0.7.x and earlier without re-downloading the blockchain is not supported.
+However, as usual, old wallet versions are still supported.
+
+Downgrading warning
+-------------------
+
+Wallets created in 0.16 and later are not compatible with versions prior to 0.16
+and will not work if you try to use newly created wallets in older versions. Existing
+wallets that were created with older versions are not affected by this.
+
 Compatibility
 ==============
 
 Bitcoin Core is extensively tested on multiple operating systems using
-the Linux kernel, macOS 10.8+, and Windows Vista and later.
-
-Microsoft ended support for Windows XP on [April 8th, 2014](https://www.microsoft.com/en-us/WindowsForBusiness/end-of-xp-support),
-No attempt is made to prevent installing or running the software on Windows XP, you
-can still do so at your own risk but be aware that there are known instabilities and issues.
-Please do not report issues about Windows XP to the issue tracker.
+the Linux kernel, macOS 10.8+, and Windows Vista and later. Windows XP is not supported.
 
 Bitcoin Core should also work on most other Unix-like systems but is not
 frequently tested on them.
 
-Notable changes
-===============
+0.16.2 change log
+------------------
 
-RPC changes
------------
-
-- The first positional argument of `createrawtransaction` was renamed from
-  `transactions` to `inputs`.
-
-- The argument of `disconnectnode` was renamed from `node` to `address`.
-
-These interface changes break compatibility with 0.14.0, when the named
-arguments functionality, introduced in 0.14.0, is used. Client software
-using these calls with named arguments needs to be updated.
-
-Mining
-------
-
-In previous versions, getblocktemplate required segwit support from downstream
-clients/miners once the feature activated on the network. In this version, it
-now supports non-segwit clients even after activation, by removing all segwit
-transactions from the returned block template. This allows non-segwit miners to
-continue functioning correctly even after segwit has activated.
-
-Due to the limitations in previous versions, getblocktemplate also recommended
-non-segwit clients to not signal for the segwit version-bit. Since this is no
-longer an issue, getblocktemplate now always recommends signalling segwit for
-all miners. This is safe because ability to enforce the rule is the only
-required criteria for safe activation, not actually producing segwit-enabled
-blocks.
-
-UTXO memory accounting
-----------------------
-
-Memory usage for the UTXO cache is being calculated more accurately, so that
-the configured limit (`-dbcache`) will be respected when memory usage peaks
-during cache flushes.  The memory accounting in prior releases is estimated to
-only account for half the actual peak utilization.
-
-The default `-dbcache` has also been changed in this release to 450MiB.  Users
-who currently set `-dbcache` to a high value (e.g. to keep the UTXO more fully
-cached in memory) should consider increasing this setting in order to achieve
-the same cache performance as prior releases.  Users on low-memory systems
-(such as systems with 1GB or less) should consider specifying a lower value for
-this parameter.
-
-Additional information relating to running on low-memory systems can be found
-here:
-[reducing-bitcoind-memory-usage.md](https://gist.github.com/laanwj/efe29c7661ce9b6620a7).
-
-0.14.1 Change log
-=================
-
-Detailed release notes follow. This overview includes changes that affect
-behavior, not code moves, refactors and string updates. For convenience in locating
-the code changes and accompanying discussion, both the pull request and
-git merge commit are mentioned.
+### Wallet
+- #13622 `c04a4a5` Remove mapRequest tracking that just effects Qt display. (TheBlueMatt)
+- #12905 `cfc6f74` [rpcwallet] Clamp walletpassphrase value at 100M seconds (sdaftuar)
+- #13437 `ed82e71` wallet: Erase wtxOrderd wtx pointer on removeprunedfunds (MarcoFalke)
 
 ### RPC and other APIs
-- #10084 `142fbb2` Rename first named arg of createrawtransaction (MarcoFalke)
-- #10139 `f15268d` Remove auth cookie on shutdown (practicalswift)
-- #10146 `2fea10a` Better error handling for submitblock (rawodb, gmaxwell)
-- #10144 `d947afc` Prioritisetransaction wasn't always updating ancestor fee (sdaftuar)
-- #10204 `3c79602` Rename disconnectnode argument (jnewbery)
-
-### Block and transaction handling
-- #10126 `0b5e162` Compensate for memory peak at flush time (sipa)
-- #9912 `fc3d7db` Optimize GetWitnessHash() for non-segwit transactions (sdaftuar)
-- #10133 `ab864d3` Clean up calculations of pcoinsTip memory usage (morcos)
-
-### P2P protocol and network code
-- #9953/#10013 `d2548a4` Fix shutdown hang with >= 8 -addnodes set (TheBlueMatt)
-- #10176 `30fa231` net: gracefully handle NodeId wrapping (theuni)
-
-### Build system
-- #9973 `e9611d1` depends: fix zlib build on osx (theuni)
+- #13451 `cbd2f70` rpc: expose CBlockIndex::nTx in getblock(header) (instagibbs)
+- #13507 `f7401c8` RPC: Fix parameter count check for importpubkey (kristapsk)
+- #13452 `6b9dc8c` rpc: have verifytxoutproof check the number of txns in proof structure (instagibbs)
+- #12837 `bf1f150` rpc: fix type mistmatch in `listreceivedbyaddress` (joemphilips)
+- #12743 `657dfc5` Fix csBestBlock/cvBlockChange waiting in rpc/mining (sipa)
 
 ### GUI
-- #10060 `ddc2dd1` Ensure an item exists on the rpcconsole stack before adding (achow101)
+- #12432 `f78e7f6` [qt] send: Clear All also resets coin control options (Sjors)
+- #12617 `21dd512` gui: Show messages as text not html (laanwj)
+- #12793 `cf6feb7` qt: Avoid reseting on resetguisettigs=0 (MarcoFalke)
 
-### Mining
-- #9955/#10006 `569596c` Don't require segwit in getblocktemplate for segwit signalling or mining (sdaftuar)
-- #9959/#10127 `b5c3440` Prevent slowdown in CreateNewBlock on large mempools (sdaftuar)
+### Build system
+- #13544 `9fd3e00` depends: Update Qt download url (fanquake)
+- #12573 `88d1a64` Fix compilation when compiler do not support `__builtin_clz*` (532479301)
 
 ### Tests and QA
-- #10157 `55f641c` Fix the `mempool_packages.py` test (sdaftuar)
+- #13061 `170b309` Make tests pass after 2020 (bmwiedemann)
+- #13192 `79c4fff` [tests] Fixed intermittent failure in `p2p_sendheaders.py` (lmanners)
+- #13300 `d9c5630` qa: Initialize lockstack to prevent null pointer deref (MarcoFalke)
+- #13545 `e15e3a9` tests: Fix test case `streams_serializedata_xor` Remove Boost dependency. (practicalswift)
+- #13304 `cbdabef` qa: Fix `wallet_listreceivedby` race (MarcoFalke)
 
 ### Miscellaneous
-- #10037 `4d8e660` Trivial: Fix typo in help getrawtransaction RPC (keystrike)
-- #10120 `e4c9a90` util: Work around (virtual) memory exhaustion on 32-bit w/ glibc (laanwj)
-- #10130 `ecc5232` bitcoin-tx input verification (awemany, jnewbery)
+- #12887 `2291774` Add newlines to end of log messages (jnewbery)
+- #12859 `18b0c69` Bugfix: Include <memory> for `std::unique_ptr` (luke-jr)
+- #13131 `ce8aa54` Add Windows shutdown handler (ken2812221)
+- #13652 `20461fc` rpc: Fix that CWallet::AbandonTransaction would leave the grandchildren, etc. active (Empact)
 
 Credits
 =======
 
 Thanks to everyone who directly contributed to this release:
 
-- Alex Morcos
-- Andrew Chow
-- Awemany
+- 532479301
+- Ben Woosley
+- Bernhard M. Wiedemann
+- Chun Kuan Lee
 - Cory Fields
-- Gregory Maxwell
-- James Evans
+- fanquake
+- Gregory Sanders
+- joemphilips
 - John Newbery
+- Kristaps Kaupe
+- lmanners
+- Luke Dashjr
 - MarcoFalke
 - Matt Corallo
 - Pieter Wuille
 - practicalswift
-- rawodb
+- Sjors Provoost
 - Suhas Daftuar
 - Wladimir J. van der Laan
 
-As well as everyone that helped translating on [Transifex](https://www.transifex.com/projects/p/bitcoin/).
+And to those that reported security issues:
 
+- Braydon Fuller
+- Himanshu Mehta
+
+As well as everyone that helped translating on [Transifex](https://www.transifex.com/projects/p/bitcoin/).
